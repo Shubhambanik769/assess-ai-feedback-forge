@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { AssessmentGenerator } from "./assessment-generator"
 import { AssignmentViewer } from "./assignment-viewer"
+import { SubmissionListDialog } from "./submission-list-dialog"
 import { useAssignments } from "@/hooks/useAssignments"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -34,6 +35,7 @@ export function FacultyDashboard() {
   const [currentAssessment, setCurrentAssessment] = useState<AssessmentData | null>(null)
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [selectedSubmissionForViewing, setSelectedSubmissionForViewing] = useState<any>(null)
   const { toast } = useToast()
   
   const {
@@ -53,16 +55,15 @@ export function FacultyDashboard() {
 
     setIsPublishing(true)
     try {
-      // Create assignment template
       const { data: template, error: templateError } = await supabase
         .from('assessment_templates')
         .insert({
           title: currentAssessment.title,
           description: currentAssessment.description,
-          topic: currentAssessment.title, // Using title as topic for now
+          topic: currentAssessment.title,
           difficulty_level: 'medium',
           total_questions: currentAssessment.questions.length,
-          created_by: crypto.randomUUID(), // In real app, this would be the authenticated user's ID
+          created_by: crypto.randomUUID(),
           is_published: true
         })
         .select()
@@ -70,7 +71,6 @@ export function FacultyDashboard() {
 
       if (templateError) throw templateError
 
-      // Create questions
       const questionsToInsert = currentAssessment.questions.map(q => ({
         assessment_template_id: template.id,
         question_text: q.question_text,
@@ -85,7 +85,6 @@ export function FacultyDashboard() {
 
       if (questionsError) throw questionsError
 
-      // Create assignment
       const { error: assignmentError } = await supabase
         .from('assignments')
         .insert({
@@ -94,7 +93,7 @@ export function FacultyDashboard() {
           max_score: currentAssessment.total_marks,
           total_marks: currentAssessment.total_marks,
           template_id: template.id,
-          created_by: crypto.randomUUID() // In real app, this would be the authenticated user's ID
+          created_by: crypto.randomUUID()
         })
 
       if (assignmentError) throw assignmentError
@@ -124,7 +123,6 @@ export function FacultyDashboard() {
     if (files && files.length > 0) {
       setSignatureFile(files[0])
       
-      // Upload signature to storage
       try {
         const fileExt = files[0].name.split('.').pop()
         const fileName = `signature-${Date.now()}.${fileExt}`
@@ -170,6 +168,16 @@ export function FacultyDashboard() {
   const getGradedCount = (assignmentId: string) => {
     const assignmentSubmissions = getSubmissionsForAssignment(assignmentId)
     return assignmentSubmissions.filter(s => s.status === 'graded').length
+  }
+
+  const getUngradedCount = (assignmentId: string) => {
+    const assignmentSubmissions = getSubmissionsForAssignment(assignmentId)
+    return assignmentSubmissions.filter(s => s.status !== 'graded').length
+  }
+
+  const handleViewSubmission = (submission: any) => {
+    setSelectedSubmissionForViewing(submission)
+    setActiveTab("grading")
   }
 
   return (
@@ -244,6 +252,9 @@ export function FacultyDashboard() {
             {assignments.map((assignment) => {
               const submissionCount = getSubmissionsForAssignment(assignment.id).length
               const gradedCount = getGradedCount(assignment.id)
+              const ungradedCount = getUngradedCount(assignment.id)
+              const gradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status === 'graded')
+              const ungradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status !== 'graded')
               
               return (
                 <Card key={assignment.id}>
@@ -272,10 +283,33 @@ export function FacultyDashboard() {
                           <Users className="w-4 h-4" />
                           {submissionCount} submissions
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          {gradedCount} graded
-                        </span>
+                        
+                        <SubmissionListDialog
+                          trigger={
+                            <button className="flex items-center gap-1 hover:text-green-600 transition-colors">
+                              <Eye className="w-4 h-4" />
+                              {gradedCount} graded
+                            </button>
+                          }
+                          title="Graded Submissions"
+                          submissions={gradedSubmissions}
+                          assignment={assignment}
+                          onViewSubmission={handleViewSubmission}
+                        />
+                        
+                        <SubmissionListDialog
+                          trigger={
+                            <button className="flex items-center gap-1 hover:text-orange-600 transition-colors">
+                              <Eye className="w-4 h-4" />
+                              {ungradedCount} ungraded
+                            </button>
+                          }
+                          title="Ungraded Submissions"
+                          submissions={ungradedSubmissions}
+                          assignment={assignment}
+                          onViewSubmission={handleViewSubmission}
+                        />
+                        
                         <span>
                           Created: {new Date(assignment.created_at).toLocaleDateString()}
                         </span>
