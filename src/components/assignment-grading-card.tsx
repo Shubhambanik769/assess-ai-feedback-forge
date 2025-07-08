@@ -346,38 +346,103 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
                                       </div>
 
                                       {currentEvaluation?.ai_feedback && (
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-                                          <div className="flex items-center gap-2 mb-2">
-                                            <Bot className="w-4 h-4 text-blue-600" />
-                                            <span className="text-sm font-medium text-blue-900">AI Feedback</span>
-                                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
-                                              {Math.round((currentEvaluation.score / currentEvaluation.max_score) * 100)}%
-                                            </Badge>
+                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200">
+                                          <div className="flex items-center gap-3 mb-4">
+                                            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                                              <Bot className="w-4 h-4 text-blue-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                              <span className="text-base font-semibold text-blue-900">AI Evaluation Report</span>
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="secondary" className="text-sm bg-blue-100 text-blue-800">
+                                                  Score: {currentEvaluation.score}/{currentEvaluation.max_score}
+                                                </Badge>
+                                                <Badge variant="outline" className="text-sm">
+                                                  {Math.round((currentEvaluation.score / currentEvaluation.max_score) * 100)}%
+                                                </Badge>
+                                              </div>
+                                            </div>
                                           </div>
-                                          <div className="text-xs text-blue-800 space-y-2 max-h-40 overflow-y-auto">
+
+                                          {/* Expandable Detailed View */}
+                                          <div className="space-y-3 max-h-60 overflow-y-auto">
+                                            {/* Overall Assessment */}
                                             {currentEvaluation.ai_feedback.detailed_feedback && (
-                                              <div>
-                                                <strong>Assessment:</strong>
-                                                <p className="mt-1">{currentEvaluation.ai_feedback.detailed_feedback}</p>
+                                              <div className="p-3 bg-white rounded-lg border border-blue-100">
+                                                <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                                                  <CheckCircle className="w-4 h-4 text-blue-500" />
+                                                  Overall Assessment
+                                                </h4>
+                                                <p className="text-sm text-gray-700 leading-relaxed">
+                                                  {currentEvaluation.ai_feedback.detailed_feedback}
+                                                </p>
                                               </div>
                                             )}
+
+                                            {/* Strengths */}
+                                            {currentEvaluation.ai_feedback.strengths && (
+                                              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                                                <h4 className="text-sm font-semibold text-green-900 mb-2 flex items-center gap-2">
+                                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                                  Strengths Identified
+                                                </h4>
+                                                <ul className="space-y-1">
+                                                  {currentEvaluation.ai_feedback.strengths.map((strength: string, i: number) => (
+                                                    <li key={i} className="text-sm text-green-800 flex items-start gap-2">
+                                                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></span>
+                                                      <span>{strength}</span>
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              </div>
+                                            )}
+
+                                            {/* Areas for Improvement */}
+                                            {currentEvaluation.ai_feedback.improvements && (
+                                              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                                <h4 className="text-sm font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                                                  <Bot className="w-4 h-4 text-amber-600" />
+                                                  Areas for Improvement
+                                                </h4>
+                                                <ul className="space-y-1">
+                                                  {currentEvaluation.ai_feedback.improvements.map((improvement: string, i: number) => (
+                                                    <li key={i} className="text-sm text-amber-800 flex items-start gap-2">
+                                                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></span>
+                                                      <span>{improvement}</span>
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              </div>
+                                            )}
+
+                                            {/* Grade Explanation */}
+                                            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                              <h4 className="text-sm font-semibold text-purple-900 mb-2">Why This Grade?</h4>
+                                              <p className="text-sm text-purple-800">
+                                                This grade reflects the AI's assessment based on content accuracy, completeness, 
+                                                presentation quality, and adherence to assignment requirements. The score considers 
+                                                both demonstrated understanding and areas where improvement is needed.
+                                              </p>
+                                            </div>
                                           </div>
-                                          <div className="mt-3 flex gap-2">
+
+                                          {/* Action Buttons */}
+                                          <div className="mt-4 flex gap-2">
                                             <Button 
                                               size="sm" 
                                               variant="outline" 
-                                              className="text-xs"
+                                              className="text-xs flex-1"
                                               onClick={() => setRemarks(currentEvaluation.ai_feedback.detailed_feedback || "")}
                                             >
                                               Use as Remarks
                                             </Button>
                                             <Button 
                                               size="sm" 
-                                              className="text-xs"
+                                              className="text-xs flex-1"
                                               onClick={handlePublishFeedback}
                                               disabled={currentEvaluation.is_published}
                                             >
-                                              {currentEvaluation.is_published ? 'Published' : 'Publish'}
+                                              {currentEvaluation.is_published ? 'Published to Student' : 'Publish to Student'}
                                             </Button>
                                           </div>
                                         </div>
