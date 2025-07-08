@@ -111,20 +111,31 @@ export const useAssignments = () => {
   }
 
   const uploadFile = async (file: File): Promise<string> => {
+    console.log('Starting file upload for:', file.name, 'Type:', file.type, 'Size:', file.size)
+    
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}.${fileExt}`
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
     const filePath = `assignments/${fileName}`
+
+    console.log('Uploading to path:', filePath)
 
     const { error: uploadError } = await supabase.storage
       .from('assignment-files')
-      .upload(filePath, file)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
 
-    if (uploadError) throw uploadError
+    if (uploadError) {
+      console.error('Upload error:', uploadError)
+      throw new Error(`File upload failed: ${uploadError.message}`)
+    }
 
     const { data } = supabase.storage
       .from('assignment-files')
       .getPublicUrl(filePath)
 
+    console.log('File uploaded successfully to:', data.publicUrl)
     return data.publicUrl
   }
 
@@ -135,26 +146,37 @@ export const useAssignments = () => {
   ): Promise<Submission> => {
     setLoading(true)
     try {
-      // Upload file
+      console.log('Creating submission for assignment:', assignmentId, 'Student:', studentName)
+      
+      // Upload file first
       const fileUrl = await uploadFile(file)
       
       // Create submission record
+      const submissionData = {
+        assignment_id: assignmentId,
+        student_id: crypto.randomUUID(), // In real app, this would be the authenticated user's ID
+        student_name: studentName,
+        file_path: fileUrl,
+        file_name: file.name,
+        file_type: file.type,
+        status: 'submitted'
+      }
+
+      console.log('Creating submission with data:', submissionData)
+
       const { data, error } = await supabase
         .from('submissions')
-        .insert({
-          assignment_id: assignmentId,
-          student_id: crypto.randomUUID(), // In real app, this would be the authenticated user's ID
-          student_name: studentName,
-          file_path: fileUrl,
-          file_name: file.name,
-          file_type: file.type,
-          status: 'submitted'
-        })
+        .insert(submissionData)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Submission creation error:', error)
+        throw new Error(`Failed to create submission: ${error.message}`)
+      }
 
+      console.log('Submission created successfully:', data)
+      
       await fetchSubmissions(assignmentId)
       
       toast({
@@ -167,7 +189,7 @@ export const useAssignments = () => {
       console.error('Error creating submission:', error)
       toast({
         title: 'Error',
-        description: 'Failed to upload assignment',
+        description: error instanceof Error ? error.message : 'Failed to upload assignment',
         variant: 'destructive'
       })
       throw error
