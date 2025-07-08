@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          difficulty_level: string
+          id: string
+          is_published: boolean | null
+          title: string
+          topic: string
+          total_questions: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          difficulty_level?: string
+          id?: string
+          is_published?: boolean | null
+          title: string
+          topic: string
+          total_questions?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          difficulty_level?: string
+          id?: string
+          is_published?: boolean | null
+          title?: string
+          topic?: string
+          total_questions?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       assignments: {
         Row: {
           created_at: string
@@ -21,7 +60,9 @@ export type Database = {
           description: string | null
           id: string
           max_score: number
+          template_id: string | null
           title: string
+          total_marks: number | null
           updated_at: string
         }
         Insert: {
@@ -30,7 +71,9 @@ export type Database = {
           description?: string | null
           id?: string
           max_score?: number
+          template_id?: string | null
           title: string
+          total_marks?: number | null
           updated_at?: string
         }
         Update: {
@@ -39,48 +82,70 @@ export type Database = {
           description?: string | null
           id?: string
           max_score?: number
+          template_id?: string | null
           title?: string
+          total_marks?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       evaluations: {
         Row: {
           ai_feedback: Json | null
           created_at: string
+          detailed_feedback: Json | null
           evaluation_type: string
           evaluator_id: string | null
           id: string
+          improvement_areas: string[] | null
           is_published: boolean
           manual_remarks: string | null
           max_score: number
+          question_scores: Json | null
           score: number
+          signature_included: boolean | null
           submission_id: string
           updated_at: string
         }
         Insert: {
           ai_feedback?: Json | null
           created_at?: string
+          detailed_feedback?: Json | null
           evaluation_type: string
           evaluator_id?: string | null
           id?: string
+          improvement_areas?: string[] | null
           is_published?: boolean
           manual_remarks?: string | null
           max_score: number
+          question_scores?: Json | null
           score: number
+          signature_included?: boolean | null
           submission_id: string
           updated_at?: string
         }
         Update: {
           ai_feedback?: Json | null
           created_at?: string
+          detailed_feedback?: Json | null
           evaluation_type?: string
           evaluator_id?: string | null
           id?: string
+          improvement_areas?: string[] | null
           is_published?: boolean
           manual_remarks?: string | null
           max_score?: number
+          question_scores?: Json | null
           score?: number
+          signature_included?: boolean | null
           submission_id?: string
           updated_at?: string
         }
@@ -90,6 +155,77 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          signature_url: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          signature_url?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          signature_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          assessment_template_id: string | null
+          created_at: string | null
+          id: string
+          marks: number
+          order_index: number
+          question_text: string
+          question_type: string
+        }
+        Insert: {
+          assessment_template_id?: string | null
+          created_at?: string | null
+          id?: string
+          marks?: number
+          order_index?: number
+          question_text: string
+          question_type?: string
+        }
+        Update: {
+          assessment_template_id?: string | null
+          created_at?: string | null
+          id?: string
+          marks?: number
+          order_index?: number
+          question_text?: string
+          question_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_assessment_template_id_fkey"
+            columns: ["assessment_template_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -152,7 +288,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "faculty" | "student" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -279,6 +415,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["faculty", "student", "admin"],
+    },
   },
 } as const
