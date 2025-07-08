@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { AssessmentGenerator } from "./assessment-generator"
 import { AssignmentViewer } from "./assignment-viewer"
+import { AssignmentGradingCard } from "./assignment-grading-card"
 import { SubmissionListDialog } from "./submission-list-dialog"
 import { useAssignments } from "@/hooks/useAssignments"
 import { useToast } from "@/hooks/use-toast"
@@ -264,100 +265,18 @@ export function FacultyDashboard() {
             )}
             
             {assignments.map((assignment) => {
-              const submissionCount = getSubmissionsForAssignment(assignment.id).length
-              const gradedCount = getGradedCount(assignment.id)
-              const ungradedCount = getUngradedCount(assignment.id)
-              const gradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status === 'graded')
-              const ungradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status !== 'graded')
-              
-              console.log(`Assignment ${assignment.id} stats:`, {
-                submissionCount,
-                gradedCount,
-                ungradedCount,
-                gradedSubmissions: gradedSubmissions.length,
-                ungradedSubmissions: ungradedSubmissions.length
-              })
+              const assignmentSubmissions = getSubmissionsForAssignment(assignment.id)
               
               return (
-                <Card key={assignment.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <FileText className="w-5 h-5" />
-                          {assignment.title}
-                        </CardTitle>
-                        {assignment.description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {assignment.description}
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant="outline">
-                        {assignment.max_score} marks
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {submissionCount} submissions
-                        </span>
-                        
-                        <SubmissionListDialog
-                          trigger={
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-green-600 transition-colors"
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              {gradedCount} graded
-                            </Button>
-                          }
-                          title="Graded Submissions"
-                          submissions={gradedSubmissions}
-                          assignment={assignment}
-                          onViewSubmission={handleViewSubmission}
-                        />
-                        
-                        <SubmissionListDialog
-                          trigger={
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-orange-600 transition-colors"
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              {ungradedCount} ungraded
-                            </Button>
-                          }
-                          title="Ungraded Submissions"
-                          submissions={ungradedSubmissions}
-                          assignment={assignment}
-                          onViewSubmission={handleViewSubmission}
-                        />
-                        
-                        <span>
-                          Created: {new Date(assignment.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Settings className="w-4 h-4 mr-2" />
-                          Settings
-                        </Button>
-                        <Button size="sm" onClick={() => setActiveTab("grading")}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Submissions
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <AssignmentGradingCard
+                  key={assignment.id}
+                  assignment={assignment}
+                  submissions={assignmentSubmissions}
+                  onGradeSubmission={(submissionId) => {
+                    console.log('Submission graded:', submissionId)
+                    // Refresh data or update UI as needed
+                  }}
+                />
               )
             })}
             
