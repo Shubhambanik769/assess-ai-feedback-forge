@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          max_score: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          max_score?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          max_score?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evaluations: {
+        Row: {
+          ai_feedback: Json | null
+          created_at: string
+          evaluation_type: string
+          evaluator_id: string | null
+          id: string
+          is_published: boolean
+          manual_remarks: string | null
+          max_score: number
+          score: number
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: Json | null
+          created_at?: string
+          evaluation_type: string
+          evaluator_id?: string | null
+          id?: string
+          is_published?: boolean
+          manual_remarks?: string | null
+          max_score: number
+          score: number
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: Json | null
+          created_at?: string
+          evaluation_type?: string
+          evaluator_id?: string | null
+          id?: string
+          is_published?: boolean
+          manual_remarks?: string | null
+          max_score?: number
+          score?: number
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluations_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          file_name: string | null
+          file_path: string | null
+          file_type: string | null
+          id: string
+          status: string
+          student_id: string
+          student_name: string
+          submission_date: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          status?: string
+          student_id: string
+          student_name: string
+          submission_date?: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          status?: string
+          student_id?: string
+          student_name?: string
+          submission_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
