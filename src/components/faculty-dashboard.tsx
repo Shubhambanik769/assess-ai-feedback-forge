@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -286,10 +287,10 @@ export function FacultyDashboard() {
                         
                         <SubmissionListDialog
                           trigger={
-                            <button className="flex items-center gap-1 hover:text-green-600 transition-colors">
-                              <Eye className="w-4 h-4" />
+                            <Button variant="ghost" size="sm" className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-green-600 transition-colors">
+                              <Eye className="w-4 h-4 mr-1" />
                               {gradedCount} graded
-                            </button>
+                            </Button>
                           }
                           title="Graded Submissions"
                           submissions={gradedSubmissions}
@@ -299,10 +300,10 @@ export function FacultyDashboard() {
                         
                         <SubmissionListDialog
                           trigger={
-                            <button className="flex items-center gap-1 hover:text-orange-600 transition-colors">
-                              <Eye className="w-4 h-4" />
+                            <Button variant="ghost" size="sm" className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-orange-600 transition-colors">
+                              <Eye className="w-4 h-4 mr-1" />
                               {ungradedCount} ungraded
-                            </button>
+                            </Button>
                           }
                           title="Ungraded Submissions"
                           submissions={ungradedSubmissions}
