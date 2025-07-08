@@ -99,7 +99,17 @@ export const useAssignments = () => {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      setEvaluations(data || [])
+      
+      if (submissionId) {
+        // When fetching for a specific submission, update only that evaluation
+        setEvaluations(prev => {
+          const filtered = prev.filter(e => e.submission_id !== submissionId)
+          return [...filtered, ...(data || [])]
+        })
+      } else {
+        // When fetching all evaluations
+        setEvaluations(data || [])
+      }
     } catch (error) {
       console.error('Error fetching evaluations:', error)
       toast({

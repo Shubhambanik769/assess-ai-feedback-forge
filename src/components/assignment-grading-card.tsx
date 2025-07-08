@@ -57,10 +57,8 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
   }, [selectedSubmission])
 
   useEffect(() => {
-    // Fetch evaluations for all submissions when component mounts
-    submissions.forEach(submission => {
-      fetchEvaluations(submission.id)
-    })
+    // Fetch all evaluations when component mounts
+    fetchEvaluations()
   }, [submissions])
 
   useEffect(() => {
