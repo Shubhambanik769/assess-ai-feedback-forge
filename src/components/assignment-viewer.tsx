@@ -433,11 +433,33 @@ export function AssignmentViewer() {
                             <p className="text-xs text-muted-foreground mt-1">
                               Value between 0 to {currentAssignment?.max_score || 100} is allowed
                             </p>
-                          </div>
+                           </div>
 
-                          <Button variant="outline" size="sm" className="w-full justify-start">
-                            View Rubric
-                          </Button>
+                          <div className="space-y-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full justify-start"
+                              onClick={handleAIAssessment}
+                              disabled={loading || currentSubmission.status === 'evaluating'}
+                            >
+                              {loading || currentSubmission.status === 'evaluating' ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  AI Checking...
+                                </>
+                              ) : (
+                                <>
+                                  <Bot className="w-4 h-4 mr-2" />
+                                  AI Check
+                                </>
+                              )}
+                            </Button>
+
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              View Rubric
+                            </Button>
+                          </div>
 
                           <div>
                             <label className="text-sm font-medium mb-2 block">Add Remarks</label>
