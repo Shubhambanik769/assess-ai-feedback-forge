@@ -35,6 +35,7 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
   const [remarks, setRemarks] = useState("")
   const [zoom, setZoom] = useState(100)
   const [isGradingOpen, setIsGradingOpen] = useState(false)
+  const [isViewAllOpen, setIsViewAllOpen] = useState(false)
   const { toast } = useToast()
   
   const {
@@ -489,9 +490,203 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
 
           {/* Quick Actions */}
           <div className="flex gap-2 pt-2 border-t">
-            <Button variant="outline" size="sm" className="flex-1">
-              View All ({submissions.length})
-            </Button>
+            <Dialog open={isViewAllOpen} onOpenChange={setIsViewAllOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1">
+                  View All ({submissions.length})
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>All Submissions - {assignment.title}</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-600">{submissions.length}</div>
+                        <div className="text-sm text-muted-foreground">Total Submissions</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-green-600">{gradedSubmissions.length}</div>
+                        <div className="text-sm text-muted-foreground">Graded</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-orange-600">{ungradedSubmissions.length}</div>
+                        <div className="text-sm text-muted-foreground">Pending</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* All Submissions List */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">All Student Submissions & Feedback</h3>
+                    
+                    {submissions.length > 0 ? (
+                      <div className="space-y-3">
+                        {submissions.map((submission) => {
+                          const evaluation = evaluations.find(e => e.submission_id === submission.id)
+                          
+                          return (
+                            <Card key={submission.id} className="border-l-4 border-l-blue-500">
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div>
+                                    <h4 className="font-medium text-lg">{submission.student_name || "Anonymous Student"}</h4>
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                      <span>Submitted: {new Date(submission.submission_date).toLocaleDateString()}</span>
+                                      <span>File: {submission.file_name}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={
+                                      submission.status === 'graded' ? 'default' :
+                                      submission.status === 'evaluating' ? 'secondary' : 'outline'
+                                    }>
+                                      {submission.status}
+                                    </Badge>
+                                    {evaluation && (
+                                      <Badge variant="outline" className="text-lg font-bold">
+                                        {evaluation.score}/{evaluation.max_score}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Evaluation Details */}
+                                {evaluation && (
+                                  <div className="mt-4 space-y-3">
+                                    {/* Grade Summary */}
+                                    <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+                                      <div className="text-center">
+                                        <div className="text-xl font-bold text-blue-600">
+                                          {Math.round((evaluation.score / evaluation.max_score) * 100)}%
+                                        </div>
+                                        <div className="text-xs text-blue-700">Grade</div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="text-sm font-medium text-blue-900">
+                                          Evaluation Type: {evaluation.evaluation_type === 'ai' ? 'AI Assessment' : 'Manual Grading'}
+                                        </div>
+                                        <div className="text-xs text-blue-700">
+                                          Published: {evaluation.is_published ? 'Yes' : 'No'}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* AI Feedback Summary */}
+                                    {evaluation.ai_feedback && (
+                                      <div className="grid md:grid-cols-2 gap-3">
+                                        {evaluation.ai_feedback.strengths && (
+                                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                                            <h5 className="text-sm font-semibold text-green-900 mb-2">Strengths</h5>
+                                            <ul className="space-y-1">
+                                              {evaluation.ai_feedback.strengths.slice(0, 2).map((strength: string, i: number) => (
+                                                <li key={i} className="text-xs text-green-800 flex items-start gap-1">
+                                                  <span className="w-1 h-1 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></span>
+                                                  <span>{strength}</span>
+                                                </li>
+                                              ))}
+                                              {evaluation.ai_feedback.strengths.length > 2 && (
+                                                <li className="text-xs text-green-600 italic">
+                                                  +{evaluation.ai_feedback.strengths.length - 2} more...
+                                                </li>
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+
+                                        {evaluation.ai_feedback.improvements && (
+                                          <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                            <h5 className="text-sm font-semibold text-amber-900 mb-2">Improvements</h5>
+                                            <ul className="space-y-1">
+                                              {evaluation.ai_feedback.improvements.slice(0, 2).map((improvement: string, i: number) => (
+                                                <li key={i} className="text-xs text-amber-800 flex items-start gap-1">
+                                                  <span className="w-1 h-1 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></span>
+                                                  <span>{improvement}</span>
+                                                </li>
+                                              ))}
+                                              {evaluation.ai_feedback.improvements.length > 2 && (
+                                                <li className="text-xs text-amber-600 italic">
+                                                  +{evaluation.ai_feedback.improvements.length - 2} more...
+                                                </li>
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Detailed Feedback */}
+                                    {evaluation.ai_feedback?.detailed_feedback && (
+                                      <div className="p-3 bg-gray-50 rounded-lg">
+                                        <h5 className="text-sm font-semibold text-gray-900 mb-2">Detailed Feedback</h5>
+                                        <p className="text-xs text-gray-700 line-clamp-3">
+                                          {evaluation.ai_feedback.detailed_feedback}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Manual Remarks */}
+                                    {evaluation.manual_remarks && (
+                                      <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                                        <h5 className="text-sm font-semibold text-indigo-900 mb-2">Faculty Remarks</h5>
+                                        <p className="text-xs text-indigo-800">
+                                          {evaluation.manual_remarks}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-2 pt-2">
+                                      <Button size="sm" variant="outline" onClick={() => openGradingDialog(submission)}>
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        View Details
+                                      </Button>
+                                      {!evaluation.is_published && (
+                                        <Button size="sm" onClick={() => {
+                                          setSelectedSubmission(submission)
+                                          setCurrentEvaluation(evaluation)
+                                          handlePublishFeedback()
+                                        }}>
+                                          Publish Feedback
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Not Graded Yet */}
+                                {!evaluation && (
+                                  <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200 text-center">
+                                    <p className="text-sm text-orange-800 mb-2">Not graded yet</p>
+                                    <Button size="sm" onClick={() => openGradingDialog(submission)}>
+                                      <GraduationCap className="w-3 h-3 mr-1" />
+                                      Grade Now
+                                    </Button>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                        <p className="text-muted-foreground">No submissions found for this assignment</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" size="sm" className="flex-1">
               Export Grades
             </Button>
