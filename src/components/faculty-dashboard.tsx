@@ -312,7 +312,6 @@ export function FacultyDashboard() {
                               variant="ghost" 
                               size="sm" 
                               className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-green-600 transition-colors"
-                              onClick={() => console.log('Graded button clicked for assignment:', assignment.id)}
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               {gradedCount} graded
@@ -330,7 +329,6 @@ export function FacultyDashboard() {
                               variant="ghost" 
                               size="sm" 
                               className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-orange-600 transition-colors"
-                              onClick={() => console.log('Ungraded button clicked for assignment:', assignment.id)}
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               {ungradedCount} ungraded
