@@ -57,6 +57,13 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
   }, [selectedSubmission])
 
   useEffect(() => {
+    // Fetch evaluations for all submissions when component mounts
+    submissions.forEach(submission => {
+      fetchEvaluations(submission.id)
+    })
+  }, [submissions])
+
+  useEffect(() => {
     if (evaluations.length > 0 && selectedSubmission) {
       const evaluation = evaluations.find(e => e.submission_id === selectedSubmission.id)
       if (evaluation) {
@@ -128,9 +135,17 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
 
   const openGradingDialog = (submission: Submission) => {
     setSelectedSubmission(submission)
-    setCurrentEvaluation(null)
-    setGrade("")
-    setRemarks("")
+    // Find existing evaluation for this submission instead of resetting
+    const existingEvaluation = evaluations.find(e => e.submission_id === submission.id)
+    if (existingEvaluation) {
+      setCurrentEvaluation(existingEvaluation)
+      setGrade(existingEvaluation.score.toString())
+      setRemarks(existingEvaluation.manual_remarks || "")
+    } else {
+      setCurrentEvaluation(null)
+      setGrade("")
+      setRemarks("")
+    }
     setIsGradingOpen(true)
   }
 
