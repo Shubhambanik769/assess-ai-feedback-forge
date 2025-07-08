@@ -62,17 +62,26 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				navy: {
-					primary: 'hsl(var(--navy-primary))',
-					secondary: 'hsl(var(--navy-secondary))',
-					light: 'hsl(var(--navy-light))'
+				// Sunstone custom colors - properly mapped
+				'sunstone-gold': {
+					DEFAULT: 'hsl(var(--sunstone-gold))',
+					light: 'hsl(var(--sunstone-gold-light))',
+					dark: 'hsl(var(--sunstone-gold-dark))'
 				},
-				blue: {
-					accent: 'hsl(var(--blue-accent))'
+				'sunstone-terracotta': {
+					DEFAULT: 'hsl(var(--sunstone-terracotta))',
+					light: 'hsl(var(--sunstone-terracotta-light))',
+					dark: 'hsl(var(--sunstone-terracotta-dark))'
 				},
-				gray: {
-					light: 'hsl(var(--gray-light))',
-					medium: 'hsl(var(--gray-medium))'
+				'sunstone-navy': {
+					DEFAULT: 'hsl(var(--sunstone-navy))',
+					light: 'hsl(var(--sunstone-navy-light))',
+					dark: 'hsl(var(--sunstone-navy-dark))'
+				},
+				'sunstone-warm-gray': {
+					DEFAULT: 'hsl(var(--sunstone-warm-gray))',
+					light: 'hsl(var(--sunstone-warm-gray-light))',
+					dark: 'hsl(var(--sunstone-warm-gray-dark))'
 				}
 			},
 			borderRadius: {
