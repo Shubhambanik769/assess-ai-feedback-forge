@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { 
   Upload, 
   FileText, 
@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Bot,
   User,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,7 +20,9 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
+import { useAssignments, type Assignment, type Submission, type Evaluation } from "@/hooks/useAssignments"
 
 const mockPages = [
   "/lovable-uploads/655f3504-5127-4580-8419-548364013def.png",
@@ -33,66 +36,147 @@ export function AssignmentViewer() {
   const [grade, setGrade] = useState("")
   const [remarks, setRemarks] = useState("")
   const [assessmentMode, setAssessmentMode] = useState("manual")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [aiFeedback, setAiFeedback] = useState("")
+  const [studentName, setStudentName] = useState("Chayansh Jain")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [currentSubmission, setCurrentSubmission] = useState<Submission | null>(null)
+  const [currentEvaluation, setCurrentEvaluation] = useState<Evaluation | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const { toast } = useToast()
+  
+  const {
+    assignments,
+    submissions,
+    evaluations,
+    loading,
+    fetchSubmissions,
+    fetchEvaluations,
+    createSubmission,
+    evaluateWithAI,
+    createManualEvaluation,
+    publishEvaluation
+  } = useAssignments()
 
+  const currentAssignment = assignments[0] // Use first assignment for demo
   const totalPages = mockPages.length
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (currentAssignment) {
+      fetchSubmissions(currentAssignment.id)
+    }
+  }, [currentAssignment])
+
+  useEffect(() => {
+    if (currentSubmission) {
+      fetchEvaluations(currentSubmission.id)
+    }
+  }, [currentSubmission])
+
+  useEffect(() => {
+    if (submissions.length > 0 && !currentSubmission) {
+      setCurrentSubmission(submissions[0])
+    }
+  }, [submissions])
+
+  useEffect(() => {
+    if (evaluations.length > 0 && currentSubmission) {
+      const evaluation = evaluations.find(e => e.submission_id === currentSubmission.id)
+      if (evaluation) {
+        setCurrentEvaluation(evaluation)
+        setGrade(evaluation.score.toString())
+        setRemarks(evaluation.manual_remarks || "")
+      }
+    }
+  }, [evaluations, currentSubmission])
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
-    if (files && files.length > 0) {
+    if (files && files.length > 0 && currentAssignment) {
+      setSelectedFile(files[0])
       toast({
-        title: "Assignment Uploaded",
-        description: `${files.length} file(s) uploaded successfully.`,
+        title: "File Selected",
+        description: `${files[0].name} selected for upload.`,
       })
     }
   }
 
-  const handleAIAssessment = async () => {
-    setIsProcessing(true)
-    // Simulate AI processing
-    setTimeout(() => {
-      setAiFeedback(`
-**AI Assessment Report**
-
-**Score: 62/70 (88.5%)**
-
-**Strengths:**
-• Excellent understanding of DevOps principles and philosophy
-• Clear explanation of continuous integration concepts
-• Good knowledge of deployment automation benefits
-• Well-structured answers with logical flow
-
-**Areas for Improvement:**
-• Could provide more specific examples of CI/CD tools
-• Missing discussion of containerization technologies
-• Limited mention of monitoring and logging practices
-• Could elaborate more on infrastructure as code concepts
-
-**Detailed Feedback:**
-The student demonstrates a solid grasp of DevOps fundamentals. The explanation of continuous integration shows good theoretical understanding. However, the answer would benefit from practical examples and tool-specific knowledge.
-
-**Recommendations:**
-1. Study Docker and Kubernetes containerization
-2. Explore Jenkins, GitLab CI, or GitHub Actions
-3. Learn about infrastructure as code (Terraform, Ansible)
-4. Research monitoring tools like Prometheus and Grafana
-      `)
-      setGrade("62")
-      setIsProcessing(false)
+  const handleUploadSubmission = async () => {
+    if (!selectedFile || !currentAssignment || !studentName.trim()) {
       toast({
-        title: "AI Assessment Complete",
-        description: "Detailed feedback has been generated.",
+        title: "Error",
+        description: "Please select a file and enter student name.",
+        variant: "destructive"
       })
-    }, 3000)
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const submission = await createSubmission(currentAssignment.id, studentName, selectedFile)
+      setCurrentSubmission(submission)
+      setSelectedFile(null)
+    } catch (error) {
+      console.error('Upload error:', error)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
-  const handleSubmit = () => {
-    toast({
-      title: "Grade Submitted",
-      description: "Assignment has been graded successfully.",
-    })
+  const handleAIAssessment = async () => {
+    if (!currentSubmission || !currentAssignment) {
+      toast({
+        title: "Error",
+        description: "No submission selected for evaluation.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      const evaluation = await evaluateWithAI(currentSubmission.id, currentAssignment.title)
+      setCurrentEvaluation(evaluation)
+    } catch (error) {
+      console.error('AI evaluation error:', error)
+    }
+  }
+
+  const handleManualSubmit = async () => {
+    if (!currentSubmission || !grade || !currentAssignment) {
+      toast({
+        title: "Error",
+        description: "Please enter a grade.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      const evaluation = await createManualEvaluation(
+        currentSubmission.id,
+        parseInt(grade),
+        currentAssignment.max_score,
+        remarks
+      )
+      setCurrentEvaluation(evaluation)
+    } catch (error) {
+      console.error('Manual evaluation error:', error)
+    }
+  }
+
+  const handlePublishFeedback = async () => {
+    if (!currentEvaluation) {
+      toast({
+        title: "Error",
+        description: "No evaluation to publish.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      await publishEvaluation(currentEvaluation.id)
+    } catch (error) {
+      console.error('Publish error:', error)
+    }
   }
 
   return (
@@ -103,10 +187,20 @@ The student demonstrates a solid grasp of DevOps fundamentals. The explanation o
         <div className="p-4 border-b bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold">Assignment 1 - DEVOPS_ASSIGNMENT_...11745338466625</h1>
+              <h1 className="text-xl font-semibold">
+                {currentAssignment?.title || "Assignment"}
+              </h1>
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                <span>Chayansh Jain</span>
-                <span>1/1</span>
+                <span>{currentSubmission?.student_name || studentName}</span>
+                <span>{submissions.length > 0 ? `${submissions.findIndex(s => s.id === currentSubmission?.id) + 1}/${submissions.length}` : "0/0"}</span>
+                {currentSubmission && (
+                  <Badge variant={
+                    currentSubmission.status === 'graded' ? 'default' :
+                    currentSubmission.status === 'evaluating' ? 'secondary' : 'outline'
+                  }>
+                    {currentSubmission.status}
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -166,12 +260,21 @@ The student demonstrates a solid grasp of DevOps fundamentals. The explanation o
               {/* Document Display */}
               <div className="flex-1 overflow-auto p-4">
                 <div className="max-w-2xl mx-auto">
-                  <img 
-                    src={mockPages[currentPage - 1]} 
-                    alt={`Page ${currentPage}`}
-                    className="w-full shadow-lg rounded"
-                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-                  />
+                  {currentSubmission?.file_path ? (
+                    <img 
+                      src={currentSubmission.file_path} 
+                      alt={currentSubmission.file_name || `Page ${currentPage}`}
+                      className="w-full shadow-lg rounded"
+                      style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                    />
+                  ) : (
+                    <div className="w-full h-96 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                        <p className="text-muted-foreground">No submission uploaded yet</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -212,14 +315,28 @@ The student demonstrates a solid grasp of DevOps fundamentals. The explanation o
                     <CardTitle className="text-lg">Upload Assignment</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="student-name">Student Name</Label>
+                      <Input
+                        id="student-name"
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        placeholder="Enter student name"
+                      />
+                    </div>
+
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                       <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground mb-2">
                         Upload handwritten, Word, or PDF files
                       </p>
+                      {selectedFile && (
+                        <div className="mb-2 p-2 bg-muted rounded text-sm">
+                          Selected: {selectedFile.name}
+                        </div>
+                      )}
                       <input
                         type="file"
-                        multiple
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         onChange={handleFileUpload}
                         className="hidden"
@@ -227,127 +344,218 @@ The student demonstrates a solid grasp of DevOps fundamentals. The explanation o
                       />
                       <label htmlFor="file-upload">
                         <Button variant="outline" size="sm" asChild>
-                          <span>Choose Files</span>
+                          <span>Choose File</span>
                         </Button>
                       </label>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">Assessment Method</Label>
-                      <RadioGroup value={assessmentMode} onValueChange={setAssessmentMode}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="manual" id="manual" />
-                          <Label htmlFor="manual" className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            Manual Check by Faculty
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="ai" id="ai" />
-                          <Label htmlFor="ai" className="flex items-center gap-2">
-                            <Bot className="w-4 h-4" />
-                            AI-Based Assessment
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    {assessmentMode === "ai" && (
+                    {selectedFile && (
                       <Button 
-                        onClick={handleAIAssessment} 
-                        disabled={isProcessing}
+                        onClick={handleUploadSubmission}
+                        disabled={isUploading || !studentName.trim()}
                         className="w-full"
                       >
-                        {isProcessing ? (
-                          <>Processing...</>
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
                         ) : (
                           <>
-                            <Bot className="w-4 h-4 mr-2" />
-                            Start AI Assessment
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload Assignment
                           </>
                         )}
                       </Button>
+                    )}
+
+                    {currentSubmission && (
+                      <>
+                        <div className="space-y-3 border-t pt-4">
+                          <Label className="text-sm font-medium">Assessment Method</Label>
+                          <RadioGroup value={assessmentMode} onValueChange={setAssessmentMode}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="manual" id="manual" />
+                              <Label htmlFor="manual" className="flex items-center gap-2">
+                                <User className="w-4 h-4" />
+                                Manual Check by Faculty
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="ai" id="ai" />
+                              <Label htmlFor="ai" className="flex items-center gap-2">
+                                <Bot className="w-4 h-4" />
+                                AI-Based Assessment
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+
+                        {assessmentMode === "ai" && !currentEvaluation && (
+                          <Button 
+                            onClick={handleAIAssessment} 
+                            disabled={loading || currentSubmission.status === 'evaluating'}
+                            className="w-full"
+                          >
+                            {loading || currentSubmission.status === 'evaluating' ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Bot className="w-4 h-4 mr-2" />
+                                Start AI Assessment
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="grade" className="space-y-4">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Graded Students (0)</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Ungraded Students (2)</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium mb-4">Grade</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-2 block">
-                          DEVOPS_ASSIGNMENT_...11745338466625
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            value={grade}
-                            onChange={(e) => setGrade(e.target.value)}
-                            className="w-16 h-12 text-xl font-bold text-center border rounded"
-                            max="70"
-                            min="0"
-                          />
-                          <span className="text-xl font-bold">/70</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Value between 0 to 70 is allowed
-                        </p>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          Graded Students ({submissions.filter(s => s.status === 'graded').length})
+                        </span>
+                        <ChevronRight className="w-4 h-4" />
                       </div>
-
-                      <Button variant="outline" size="sm" className="w-full justify-start">
-                        View Rubric
-                      </Button>
-
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Add Remarks</label>
-                        <Textarea
-                          value={remarks}
-                          onChange={(e) => setRemarks(e.target.value)}
-                          placeholder="Add your remarks here..."
-                          className="min-h-[100px]"
-                        />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          Ungraded Students ({submissions.filter(s => s.status !== 'graded').length})
+                        </span>
+                        <ChevronRight className="w-4 h-4" />
                       </div>
-
-                      {aiFeedback && (
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Bot className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm font-medium text-blue-900">AI Feedback</span>
-                          </div>
-                          <div className="text-xs text-blue-800 whitespace-pre-line max-h-40 overflow-y-auto">
-                            {aiFeedback}
-                          </div>
-                          <div className="mt-3 flex gap-2">
-                            <Button size="sm" variant="outline" className="text-xs">
-                              Edit Feedback
-                            </Button>
-                            <Button size="sm" className="text-xs">
-                              Publish Report
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      <Button onClick={handleSubmit} className="w-full">
-                        Submit
-                      </Button>
                     </div>
+
+                    {currentSubmission && (
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Grade</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm text-muted-foreground mb-2 block">
+                              {currentAssignment?.title || "Assignment"}
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={grade}
+                                onChange={(e) => setGrade(e.target.value)}
+                                className="w-16 h-12 text-xl font-bold text-center border rounded"
+                                max={currentAssignment?.max_score || 100}
+                                min="0"
+                                disabled={currentEvaluation?.evaluation_type === 'ai'}
+                              />
+                              <span className="text-xl font-bold">/{currentAssignment?.max_score || 100}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Value between 0 to {currentAssignment?.max_score || 100} is allowed
+                            </p>
+                          </div>
+
+                          <Button variant="outline" size="sm" className="w-full justify-start">
+                            View Rubric
+                          </Button>
+
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Add Remarks</label>
+                            <Textarea
+                              value={remarks}
+                              onChange={(e) => setRemarks(e.target.value)}
+                              placeholder="Add your remarks here..."
+                              className="min-h-[100px]"
+                              disabled={currentEvaluation?.evaluation_type === 'ai'}
+                            />
+                          </div>
+
+                          {currentEvaluation?.ai_feedback && (
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Bot className="w-4 h-4 text-blue-600" />
+                                <span className="text-sm font-medium text-blue-900">AI Feedback</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {Math.round((currentEvaluation.score / currentEvaluation.max_score) * 100)}%
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-blue-800 space-y-2 max-h-40 overflow-y-auto">
+                                {currentEvaluation.ai_feedback.strengths && (
+                                  <div>
+                                    <strong>Strengths:</strong>
+                                    <ul className="list-disc ml-4">
+                                      {currentEvaluation.ai_feedback.strengths.map((strength: string, i: number) => (
+                                        <li key={i}>{strength}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {currentEvaluation.ai_feedback.improvements && (
+                                  <div>
+                                    <strong>Areas for Improvement:</strong>
+                                    <ul className="list-disc ml-4">
+                                      {currentEvaluation.ai_feedback.improvements.map((improvement: string, i: number) => (
+                                        <li key={i}>{improvement}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {currentEvaluation.ai_feedback.detailed_feedback && (
+                                  <div>
+                                    <strong>Detailed Feedback:</strong>
+                                    <p>{currentEvaluation.ai_feedback.detailed_feedback}</p>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="mt-3 flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-xs"
+                                  onClick={() => setRemarks(currentEvaluation.ai_feedback.detailed_feedback || "")}
+                                >
+                                  Edit Feedback
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  className="text-xs"
+                                  onClick={handlePublishFeedback}
+                                  disabled={currentEvaluation.is_published}
+                                >
+                                  {currentEvaluation.is_published ? 'Published' : 'Publish Report'}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          <Button 
+                            onClick={handleManualSubmit} 
+                            className="w-full"
+                            disabled={!grade || loading || (currentEvaluation?.evaluation_type === 'ai' && !currentEvaluation.is_published)}
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              currentEvaluation ? 'Update Grade' : 'Submit Grade'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!currentSubmission && (
+                      <div className="border-t pt-4 text-center text-muted-foreground">
+                        <FileText className="w-8 h-8 mx-auto mb-2" />
+                        <p className="text-sm">No submissions to grade yet</p>
+                      </div>
+                    )}
                   </div>
-                </div>
               </TabsContent>
             </Tabs>
           </div>

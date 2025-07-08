@@ -1,1 +1,7 @@
 project_id = "rktejszbibfdppdtdand"
+
+[functions.evaluate-assignment]
+verify_jwt = false
+
+[functions.extract-text]
+verify_jwt = false
