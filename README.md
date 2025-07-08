@@ -1,8 +1,8 @@
-# Welcome to your Lovable project
+# AI Assessment System
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/1c0ebe12-18cd-4df8-9db7-71da4961b918
+**Description**: Intelligent Assignment Management and Grading Platform
 
 ## How can I edit this code?
 
