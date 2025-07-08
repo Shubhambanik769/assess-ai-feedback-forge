@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { BookOpen, Upload, FileText, Clock, Award, Download } from "lucide-react"
+import { BookOpen, Upload, FileText, Clock, Award, Download, Bot, CheckCircle, TrendingUp } from "lucide-react"
 import { useAssignments } from "@/hooks/useAssignments"
 import { useToast } from "@/hooks/use-toast"
 
@@ -231,46 +231,135 @@ export function StudentDashboard() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
+                    {/* Grade Performance Summary */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
+                          <TrendingUp className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-blue-900">Performance Overview</h3>
+                          <p className="text-sm text-blue-700">
+                            You scored {Math.round((evaluation.score / evaluation.max_score) * 100)}% on this assignment
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">{evaluation.score}</div>
+                          <div className="text-xs text-gray-600">Points Earned</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-gray-800">{evaluation.max_score}</div>
+                          <div className="text-xs text-gray-600">Total Points</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {Math.round((evaluation.score / evaluation.max_score) * 100)}%
+                          </div>
+                          <div className="text-xs text-gray-600">Grade</div>
+                        </div>
+                      </div>
+                    </div>
+
                     {evaluation.ai_feedback && (
-                      <div className="space-y-3">
-                        {evaluation.ai_feedback.strengths && (
-                          <div>
-                            <h4 className="font-semibold text-green-700 mb-2">Strengths:</h4>
-                            <ul className="list-disc ml-6 space-y-1">
-                              {evaluation.ai_feedback.strengths.map((strength: string, i: number) => (
-                                <li key={i} className="text-sm">{strength}</li>
-                              ))}
-                            </ul>
+                      <div className="space-y-4">
+                        {/* AI Assessment Header */}
+                        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                          <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-full">
+                            <Bot className="w-5 h-5 text-purple-600" />
                           </div>
-                        )}
-                        
-                        {evaluation.ai_feedback.improvements && (
                           <div>
-                            <h4 className="font-semibold text-orange-700 mb-2">Areas for Improvement:</h4>
-                            <ul className="list-disc ml-6 space-y-1">
-                              {evaluation.ai_feedback.improvements.map((improvement: string, i: number) => (
-                                <li key={i} className="text-sm">{improvement}</li>
-                              ))}
-                            </ul>
+                            <h3 className="font-semibold text-purple-900">AI Assessment Report</h3>
+                            <p className="text-sm text-purple-700">
+                              Detailed analysis of your submission with personalized feedback
+                            </p>
                           </div>
-                        )}
-                        
+                        </div>
+
+                        {/* Why This Grade Section */}
+                        <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                          <h4 className="font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5" />
+                            Why You Received This Grade
+                          </h4>
+                          <p className="text-sm text-amber-800 leading-relaxed">
+                            Your grade of {Math.round((evaluation.score / evaluation.max_score) * 100)}% reflects the AI's comprehensive 
+                            evaluation of your work based on content accuracy, depth of understanding, presentation quality, 
+                            and adherence to assignment requirements. The assessment considers both your demonstrated knowledge 
+                            and areas where further development would benefit your learning.
+                          </p>
+                        </div>
+
+                        {/* Detailed Feedback */}
                         {evaluation.ai_feedback.detailed_feedback && (
-                          <div>
-                            <h4 className="font-semibold mb-2">Detailed Feedback:</h4>
-                            <p className="text-sm bg-muted p-3 rounded-lg">
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                              <FileText className="w-5 h-5 text-blue-500" />
+                              Overall Assessment
+                            </h4>
+                            <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
                               {evaluation.ai_feedback.detailed_feedback}
                             </p>
                           </div>
                         )}
+
+                        {/* Strengths */}
+                        {evaluation.ai_feedback.strengths && (
+                          <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                            <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                              What You Did Well
+                            </h4>
+                            <div className="space-y-2">
+                              {evaluation.ai_feedback.strengths.map((strength: string, i: number) => (
+                                <div key={i} className="flex items-start gap-3 bg-white p-3 rounded-lg">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-sm text-green-800">{strength}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Areas for Improvement */}
+                        {evaluation.ai_feedback.improvements && (
+                          <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                            <h4 className="font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                              <TrendingUp className="w-5 h-5 text-orange-600" />
+                              Growth Opportunities
+                            </h4>
+                            <div className="space-y-2">
+                              {evaluation.ai_feedback.improvements.map((improvement: string, i: number) => (
+                                <div key={i} className="flex items-start gap-3 bg-white p-3 rounded-lg">
+                                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-sm text-orange-800">{improvement}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Learning Tips */}
+                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                          <h4 className="font-semibold text-blue-900 mb-2">💡 Learning Tips</h4>
+                          <p className="text-sm text-blue-800">
+                            Review the feedback above and focus on the improvement areas for your next assignment. 
+                            Consider discussing any questions with your faculty during office hours.
+                          </p>
+                        </div>
                       </div>
                     )}
                     
                     {evaluation.manual_remarks && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Faculty Remarks:</h4>
-                        <p className="text-sm bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                      <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                        <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+                          <Award className="w-5 h-5 text-indigo-600" />
+                          Faculty Comments
+                        </h4>
+                        <p className="text-sm text-indigo-800 bg-white p-3 rounded-lg border-l-4 border-indigo-400">
                           {evaluation.manual_remarks}
                         </p>
                       </div>
