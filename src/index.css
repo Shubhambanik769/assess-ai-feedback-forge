@@ -8,90 +8,110 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Sunstone Design System - Warm, Professional, Educational */
+    --background: 45 15% 98%;
+    --foreground: 30 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 45 15% 100%;
+    --card-foreground: 30 25% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 45 15% 100%;
+    --popover-foreground: 30 25% 15%;
 
-    --primary: 220 100% 50%;
+    /* Sunstone Primary - Warm Golden Orange */
+    --primary: 28 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Sunstone Secondary - Deep Warm Blue */
+    --secondary: 210 45% 85%;
+    --secondary-foreground: 210 50% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 45 10% 92%;
+    --muted-foreground: 30 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Sunstone Accent - Rich Terracotta */
+    --accent: 15 75% 65%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 45 10% 88%;
+    --input: 45 10% 95%;
+    --ring: 28 85% 55%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom system colors matching the design */
-    --navy-primary: 220 30% 15%;
-    --navy-secondary: 220 25% 20%;
-    --navy-light: 220 20% 25%;
-    --blue-accent: 220 100% 50%;
-    --gray-light: 220 10% 95%;
-    --gray-medium: 220 8% 70%;
+    /* Sunstone Custom Colors */
+    --sunstone-gold: 42 88% 58%;
+    --sunstone-gold-light: 42 90% 85%;
+    --sunstone-gold-dark: 42 85% 45%;
     
-    --sidebar-background: 220 30% 15%;
+    --sunstone-terracotta: 15 75% 65%;
+    --sunstone-terracotta-light: 15 70% 85%;
+    --sunstone-terracotta-dark: 15 80% 50%;
+    
+    --sunstone-navy: 210 50% 25%;
+    --sunstone-navy-light: 210 45% 85%;
+    --sunstone-navy-dark: 210 55% 15%;
+    
+    --sunstone-warm-gray: 30 8% 85%;
+    --sunstone-warm-gray-light: 30 10% 95%;
+    --sunstone-warm-gray-dark: 30 12% 65%;
+
+    /* Sunstone Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--sunstone-gold)), hsl(var(--sunstone-terracotta)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--sunstone-navy-light)), hsl(var(--sunstone-warm-gray)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--sunstone-terracotta-light)), hsl(var(--sunstone-gold-light)));
+    
+    /* Sidebar with Sunstone theme */
+    --sidebar-background: 210 50% 25%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 220 100% 50%;
+    --sidebar-primary: 28 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 20%;
+    --sidebar-accent: 210 45% 30%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 25% 20%;
-    --sidebar-ring: 220 100% 50%;
+    --sidebar-border: 210 45% 30%;
+    --sidebar-ring: 28 85% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 30 25% 8%;
+    --foreground: 45 15% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 30 25% 10%;
+    --card-foreground: 45 15% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 30 25% 10%;
+    --popover-foreground: 45 15% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 28 85% 55%;
+    --primary-foreground: 30 25% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 30 20% 15%;
+    --secondary-foreground: 45 15% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 30 20% 15%;
+    --muted-foreground: 30 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 15 75% 65%;
+    --accent-foreground: 30 25% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 45 15% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 30 20% 20%;
+    --input: 30 20% 15%;
+    --ring: 28 85% 55%;
+    
+    --sidebar-background: 30 25% 5%;
+    --sidebar-foreground: 45 15% 95%;
+    --sidebar-primary: 28 85% 55%;
+    --sidebar-primary-foreground: 30 25% 8%;
+    --sidebar-accent: 30 20% 12%;
+    --sidebar-accent-foreground: 45 15% 95%;
+    --sidebar-border: 30 20% 12%;
+    --sidebar-ring: 28 85% 55%;
   }
 }
 
@@ -102,5 +122,33 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+}
+
+@layer components {
+  /* Sunstone Design Components */
+  .sunstone-card {
+    @apply bg-gradient-to-br from-card to-card/90 border border-border/50 rounded-xl shadow-lg backdrop-blur-sm;
+  }
+  
+  .sunstone-button-primary {
+    @apply bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-medium rounded-lg transition-all duration-300 shadow-md hover:shadow-lg;
+  }
+  
+  .sunstone-button-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-secondary-foreground font-medium rounded-lg transition-all duration-300;
+  }
+  
+  .sunstone-input {
+    @apply bg-input/50 border border-border/60 rounded-lg focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all duration-200;
+  }
+  
+  .sunstone-badge {
+    @apply bg-gradient-to-r from-accent/20 to-primary/20 text-accent-foreground border border-accent/30 rounded-full px-3 py-1 text-sm font-medium;
+  }
+  
+  .sunstone-gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold;
   }
 }

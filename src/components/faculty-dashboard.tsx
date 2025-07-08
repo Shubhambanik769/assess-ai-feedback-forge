@@ -127,21 +127,26 @@ export function FacultyDashboard() {
       // Upload signature to storage
       try {
         const fileExt = files[0].name.split('.').pop()
-        const fileName = `signature.${fileExt}`
-        const filePath = `${crypto.randomUUID()}/${fileName}`
+        const fileName = `signature-${Date.now()}.${fileExt}`
+        const filePath = `signatures/${fileName}`
 
         const { error: uploadError } = await supabase.storage
           .from('signatures')
-          .upload(filePath, files[0])
+          .upload(filePath, files[0], {
+            cacheControl: '3600',
+            upsert: false
+          })
 
-        if (uploadError) throw uploadError
+        if (uploadError) {
+          console.error('Upload error:', uploadError)
+          throw new Error(`Upload failed: ${uploadError.message}`)
+        }
 
         const { data } = supabase.storage
           .from('signatures')
           .getPublicUrl(filePath)
 
-        // Update profile with signature URL
-        // In a real app, you would update the authenticated user's profile
+        console.log('Signature uploaded successfully:', data.publicUrl)
         
         toast({
           title: "Success",
@@ -151,7 +156,7 @@ export function FacultyDashboard() {
         console.error('Error uploading signature:', error)
         toast({
           title: "Error",
-          description: "Failed to upload signature",
+          description: error instanceof Error ? error.message : "Failed to upload signature",
           variant: "destructive"
         })
       }

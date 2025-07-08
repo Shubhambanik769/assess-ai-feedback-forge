@@ -24,11 +24,7 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { useAssignments, type Assignment, type Submission, type Evaluation } from "@/hooks/useAssignments"
 
-const mockPages = [
-  "/lovable-uploads/655f3504-5127-4580-8419-548364013def.png",
-  "/lovable-uploads/655f3504-5127-4580-8419-548364013def.png",
-  "/lovable-uploads/655f3504-5127-4580-8419-548364013def.png"
-]
+// Removed mock pages - will use actual submission files
 
 export function AssignmentViewer() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -36,7 +32,7 @@ export function AssignmentViewer() {
   const [grade, setGrade] = useState("")
   const [remarks, setRemarks] = useState("")
   const [assessmentMode, setAssessmentMode] = useState("manual")
-  const [studentName, setStudentName] = useState("Chayansh Jain")
+  const [studentName, setStudentName] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [currentSubmission, setCurrentSubmission] = useState<Submission | null>(null)
   const [currentEvaluation, setCurrentEvaluation] = useState<Evaluation | null>(null)
@@ -57,7 +53,7 @@ export function AssignmentViewer() {
   } = useAssignments()
 
   const currentAssignment = assignments[0] // Use first assignment for demo
-  const totalPages = mockPages.length
+  const totalPages = 1 // Will be determined by actual submission files
 
   useEffect(() => {
     if (currentAssignment) {
@@ -278,26 +274,7 @@ export function AssignmentViewer() {
                 </div>
               </div>
 
-              {/* Page Thumbnails */}
-              <div className="border-t p-4">
-                <div className="flex gap-2 justify-center">
-                  {mockPages.map((_, index) => (
-                    <div 
-                      key={index}
-                      className={`w-12 h-16 border-2 rounded cursor-pointer ${
-                        currentPage === index + 1 ? 'border-primary' : 'border-gray-300'
-                      }`}
-                      onClick={() => setCurrentPage(index + 1)}
-                    >
-                      <img 
-                        src={mockPages[index]} 
-                        alt={`Page ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Page thumbnails - removed as no mock pages */}
             </div>
           </div>
 

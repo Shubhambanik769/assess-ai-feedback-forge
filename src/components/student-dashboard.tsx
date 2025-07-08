@@ -10,7 +10,7 @@ import { useAssignments } from "@/hooks/useAssignments"
 import { useToast } from "@/hooks/use-toast"
 
 export function StudentDashboard() {
-  const [studentName, setStudentName] = useState("John Doe")
+  const [studentName, setStudentName] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const { toast } = useToast()
   
