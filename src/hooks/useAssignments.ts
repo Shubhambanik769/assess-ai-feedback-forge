@@ -340,6 +340,8 @@ export const useAssignments = () => {
 
   useEffect(() => {
     fetchAssignments()
+    fetchSubmissions() // Fetch all submissions
+    fetchEvaluations() // Fetch all evaluations
   }, [])
 
   return {
