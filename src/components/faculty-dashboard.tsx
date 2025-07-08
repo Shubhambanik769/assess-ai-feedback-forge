@@ -163,20 +163,27 @@ export function FacultyDashboard() {
   }
 
   const getSubmissionsForAssignment = (assignmentId: string) => {
-    return submissions.filter(s => s.assignment_id === assignmentId)
+    const assignmentSubmissions = submissions.filter(s => s.assignment_id === assignmentId)
+    console.log(`Submissions for assignment ${assignmentId}:`, assignmentSubmissions)
+    return assignmentSubmissions
   }
 
   const getGradedCount = (assignmentId: string) => {
     const assignmentSubmissions = getSubmissionsForAssignment(assignmentId)
-    return assignmentSubmissions.filter(s => s.status === 'graded').length
+    const gradedSubmissions = assignmentSubmissions.filter(s => s.status === 'graded')
+    console.log(`Graded submissions for ${assignmentId}:`, gradedSubmissions)
+    return gradedSubmissions.length
   }
 
   const getUngradedCount = (assignmentId: string) => {
     const assignmentSubmissions = getSubmissionsForAssignment(assignmentId)
-    return assignmentSubmissions.filter(s => s.status !== 'graded').length
+    const ungradedSubmissions = assignmentSubmissions.filter(s => s.status !== 'graded')
+    console.log(`Ungraded submissions for ${assignmentId}:`, ungradedSubmissions)
+    return ungradedSubmissions.length
   }
 
   const handleViewSubmission = (submission: any) => {
+    console.log('HandleViewSubmission called with:', submission)
     setSelectedSubmissionForViewing(submission)
     setActiveTab("grading")
   }
@@ -250,12 +257,26 @@ export function FacultyDashboard() {
 
         <TabsContent value="assignments" className="space-y-4">
           <div className="grid gap-4">
+            {loading && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Loading assignments...</p>
+              </div>
+            )}
+            
             {assignments.map((assignment) => {
               const submissionCount = getSubmissionsForAssignment(assignment.id).length
               const gradedCount = getGradedCount(assignment.id)
               const ungradedCount = getUngradedCount(assignment.id)
               const gradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status === 'graded')
               const ungradedSubmissions = getSubmissionsForAssignment(assignment.id).filter(s => s.status !== 'graded')
+              
+              console.log(`Assignment ${assignment.id} stats:`, {
+                submissionCount,
+                gradedCount,
+                ungradedCount,
+                gradedSubmissions: gradedSubmissions.length,
+                ungradedSubmissions: ungradedSubmissions.length
+              })
               
               return (
                 <Card key={assignment.id}>
@@ -287,7 +308,12 @@ export function FacultyDashboard() {
                         
                         <SubmissionListDialog
                           trigger={
-                            <Button variant="ghost" size="sm" className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-green-600 transition-colors">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-green-600 transition-colors"
+                              onClick={() => console.log('Graded button clicked for assignment:', assignment.id)}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               {gradedCount} graded
                             </Button>
@@ -300,7 +326,12 @@ export function FacultyDashboard() {
                         
                         <SubmissionListDialog
                           trigger={
-                            <Button variant="ghost" size="sm" className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-orange-600 transition-colors">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-orange-600 transition-colors"
+                              onClick={() => console.log('Ungraded button clicked for assignment:', assignment.id)}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               {ungradedCount} ungraded
                             </Button>
@@ -332,7 +363,7 @@ export function FacultyDashboard() {
               )
             })}
             
-            {assignments.length === 0 && (
+            {assignments.length === 0 && !loading && (
               <Card>
                 <CardContent className="text-center py-8">
                   <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />

@@ -24,6 +24,9 @@ export function SubmissionListDialog({
 }: SubmissionListDialogProps) {
   const [open, setOpen] = useState(false)
 
+  console.log('SubmissionListDialog - submissions:', submissions)
+  console.log('SubmissionListDialog - assignment:', assignment)
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -35,6 +38,9 @@ export function SubmissionListDialog({
             <FileText className="w-5 h-5" />
             {title} - {assignment.title}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {submissions.length} submission{submissions.length !== 1 ? 's' : ''} found
+          </p>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -87,6 +93,7 @@ export function SubmissionListDialog({
                       <Button 
                         size="sm" 
                         onClick={() => {
+                          console.log('Viewing submission:', submission)
                           onViewSubmission(submission)
                           setOpen(false)
                         }}
