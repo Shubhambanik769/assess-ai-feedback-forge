@@ -195,7 +195,7 @@ export function AssignmentGradingCard({ assignment, submissions, onGradeSubmissi
                           Grade
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+                      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Grade Assignment - {selectedSubmission?.student_name}</DialogTitle>
                         </DialogHeader>
